@@ -2,7 +2,7 @@
 
 #### Track Your Job Search
 
-Project in Action - [Jobque](https://www.)
+Project in Action - [Jobque](https://jobque-prod.herokuapp.com/landing)
 
 #### Support
 
