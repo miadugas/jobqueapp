@@ -46,7 +46,7 @@ const Wrapper = styled.article`
     color: #e9b949;
   }
   .interview {
-    background: #e0e8f9;
+    background: #D1E7DD;
     color: #647acb;
   }
   .declined {
@@ -100,6 +100,6 @@ const Wrapper = styled.article`
   &:hover .actions {
     visibility: visible;
   }
-`
+`;
 
 export default Wrapper

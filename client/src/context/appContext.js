@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-import React, { useReducer, useContext, useEffect } from "react";
-=======
 import React, { useReducer, useContext } from "react";
->>>>>>> e5c38af638f5e9293119f2c046da3023507a3c03
+
 import reducer from "./reducer";
 import axios from "axios";
 import {
@@ -21,11 +18,17 @@ import {
   CREATE_JOB_BEGIN,
   CREATE_JOB_SUCCESS,
   CREATE_JOB_ERROR,
-<<<<<<< HEAD
   GET_JOBS_BEGIN,
   GET_JOBS_SUCCESS,
-=======
->>>>>>> e5c38af638f5e9293119f2c046da3023507a3c03
+  SET_EDIT_JOB,
+  DELETE_JOB_BEGIN,
+  EDIT_JOB_BEGIN,
+  EDIT_JOB_SUCCESS,
+  EDIT_JOB_ERROR,
+  SHOW_STATS_BEGIN,
+  SHOW_STATS_SUCCESS,
+  CLEAR_FILTERS,
+  CHANGE_PAGE,
 } from "./actions";
 
 const token = localStorage.getItem("token");
@@ -50,31 +53,26 @@ const initialState = {
   company: "",
   jobLocation: userLocation || "",
   jobTypeOptions: [
-    "Full-Time",
-    "Part-Time",
-    "Remote",
-    "Contract",
-    "Internship",
+    "full-time",
+    "part-time",
+    "remote",
+    "contract",
+    "internship",
   ],
-  jobType: "Full-Time",
-  statusOptions: [
-    "Pre-Interview",
-    "1st Interview",
-    "2nd Interview",
-    "3rd Interview",
-    "4th Interview",
-    "Other",
-    "Declined",
-    "Pending",
-  ],
-  status: "Pending",
-<<<<<<< HEAD
+  jobType: "full-time",
+  statusOptions: ["interview", "declined", "pending"],
+  status: "pending",
   jobs: [],
   totalJobs: 0,
   numOfPages: 1,
   page: 1,
-=======
->>>>>>> e5c38af638f5e9293119f2c046da3023507a3c03
+  stats: {},
+  monthlyApplications: [],
+  search: " ",
+  searchStatus: "all",
+  searchType: "all",
+  sort: "latest",
+  sortOptions: ["latest", "oldest", "a-z", "z-a"],
 };
 
 const AppContext = React.createContext();
@@ -90,9 +88,7 @@ const AppProvider = ({ children }) => {
   // response interceptor
   authFetch.interceptors.request.use(
     (config) => {
-      config.headers.common[
-        "Authorization"
-      ] = `Bearer ${state.token}`;
+      config.headers.common["Authorization"] = `Bearer ${state.token}`;
       return config;
     },
     (error) => {
@@ -185,13 +181,9 @@ const AppProvider = ({ children }) => {
   const updateUser = async (currentUser) => {
     dispatch({ type: UPDATE_USER_BEGIN });
     try {
-      const { data } = await authFetch.patch(
-        "/auth/updateUser",
-        currentUser
-      );
+      const { data } = await authFetch.patch("/auth/updateUser", currentUser);
 
-      // no token
-      const { user, location } = data;
+      const { user, location, token } = data;
 
       dispatch({
         type: UPDATE_USER_SUCCESS,
@@ -201,7 +193,7 @@ const AppProvider = ({ children }) => {
       addUserToLocalStorage({
         user,
         location,
-        token: initialState.token,
+        token,
       });
     } catch (error) {
       if (error.response.status !== 401) {
@@ -263,14 +255,17 @@ const AppProvider = ({ children }) => {
     clearAlert();
   };
 
-<<<<<<< HEAD
   const getJobs = async () => {
-    let url = `/jobs`
-  
-    dispatch({ type: GET_JOBS_BEGIN })
+    const { page, search, searchStatus, searchType, sort } = state;
+
+    let url = `/jobs?page=${page}&status=${searchStatus}&jobType=${searchType}&sort=${sort}`;
+    if (search) {
+      url = url + `&search=${search}`;
+    }
+    dispatch({ type: GET_JOBS_BEGIN });
     try {
-      const { data } = await authFetch(url)
-      const { jobs, totalJobs, numOfPages } = data
+      const { data } = await authFetch(url);
+      const { jobs, totalJobs, numOfPages } = data;
       dispatch({
         type: GET_JOBS_SUCCESS,
         payload: {
@@ -278,19 +273,90 @@ const AppProvider = ({ children }) => {
           totalJobs,
           numOfPages,
         },
-      })
+      });
     } catch (error) {
-      console.log(error.response)
-      logoutUser()
+      //logoutUser();
     }
-    clearAlert()
-  }
-  useEffect(() => {
-    getJobs()
-  }, [])
+    clearAlert();
+  };
 
-=======
->>>>>>> e5c38af638f5e9293119f2c046da3023507a3c03
+  const setEditJob = (id) => {
+    dispatch({ type: SET_EDIT_JOB, payload: { id } });
+  };
+
+  const editJob = async () => {
+    dispatch({ type: EDIT_JOB_BEGIN });
+    try {
+      const {
+        position,
+        company,
+        jobLocation,
+        jobType,
+        status,
+        url,
+        contact,
+        salary,
+      } = state;
+
+      await authFetch.patch(`/jobs/${state.editJobId}`, {
+        company,
+        position,
+        jobLocation,
+        jobType,
+        status,
+        url,
+        contact,
+        salary,
+      });
+      dispatch({
+        type: EDIT_JOB_SUCCESS,
+      });
+      dispatch({ type: CLEAR_VALUES });
+    } catch (error) {
+      if (error.response.status === 401) return;
+      dispatch({
+        type: EDIT_JOB_ERROR,
+        payload: { msg: error.response.data.msg },
+      });
+    }
+    clearAlert();
+  };
+  const deleteJob = async (jobId) => {
+    dispatch({ type: DELETE_JOB_BEGIN });
+    try {
+      await authFetch.delete(`/jobs/${jobId}`);
+      getJobs();
+    } catch (error) {
+      //logoutUser();
+    }
+  };
+
+  const showStats = async () => {
+    dispatch({ type: SHOW_STATS_BEGIN });
+    try {
+      const { data } = await authFetch("/jobs/stats");
+      dispatch({
+        type: SHOW_STATS_SUCCESS,
+        payload: {
+          stats: data.defaultStats,
+          monthlyApplications: data.monthlyApplications,
+        },
+      });
+    } catch (error) {
+      //logoutUser()
+    }
+
+    clearAlert();
+  };
+
+  const clearFilters = () => {
+    dispatch({ type: CLEAR_FILTERS });
+  };
+
+  const changePage = (page) => {
+    dispatch({ type: CHANGE_PAGE, payload: { page } });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -303,10 +369,13 @@ const AppProvider = ({ children }) => {
         handleChange,
         clearValues,
         createJob,
-<<<<<<< HEAD
         getJobs,
-=======
->>>>>>> e5c38af638f5e9293119f2c046da3023507a3c03
+        setEditJob,
+        deleteJob,
+        editJob,
+        showStats,
+        clearFilters,
+        changePage,
       }}
     >
       {children}

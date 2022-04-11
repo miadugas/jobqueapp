@@ -5,7 +5,7 @@ import Wrapper from "../assets/wrappers/BigSidebar";
 
 //import {FaHome} from 'react-icons/fa'
 const BigSidebar = () => {
-  const { showSidebar, toggleSidebar } = useAppContext();
+  const { showSidebar } = useAppContext();
   return (
     <Wrapper>
       <div
@@ -19,7 +19,7 @@ const BigSidebar = () => {
           <header>
             <Logo />
           </header>
-          <NavLinks toggleSidebar ={toggleSidebar}/>
+          <NavLinks />
         </div>
       </div>
     </Wrapper>

@@ -10,9 +10,13 @@ Find the App Useful? [You can always buy me a coffee](https://www.buymeacoffee.c
 
 ### Tools
 
-Normalize.CSS
+React, Normalize.CSS, Styled Components, React Router, Nodemon, Express, MongoDB, Validator, Http Status Codes, Bcrypt, Mongoose, JWT, Concurrently, Cors, Axios, Morgan, React Icons, MomentJS, ReCharts
 
 ---
 
 ### Pickup
-# jobqueapp
+
+# Jobque Test User
+
+email- test@user.com
+password - secret
