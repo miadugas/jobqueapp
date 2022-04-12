@@ -15,6 +15,8 @@ React, Normalize.CSS, Styled Components, React Router, Nodemon, Express, MongoDB
 ---
 
 ### Pickup
+![Image of JobQue](https://github.com/miadugas/jobqueapp/blob/main/jobque.png)
+
 
 # Jobque Test User
 
